@@ -1,225 +1,270 @@
 <template>
-  <div class="admin">
-    <div class="row">
-      <!-- Admin Header -->
-      <div class="col-12 mb-4">
-        <div class="card bg-warning text-dark">
-          <div class="card-body">
-            <h2 class="card-title">🔧 Admin Panel</h2>
-            <p class="card-text">Manage users, reviews, and application settings</p>
+  <div class="admin-container">
+    <!-- Counselor Panel Header -->
+    <div class="admin-header mb-4">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h2 class="text-white mb-2">Counselor Management Panel</h2>
+            <p class="text-white-50 mb-0">Professional management of youth mental health services</p>
           </div>
-        </div>
-      </div>
-
-      <!-- Admin Stats -->
-      <div class="col-md-3 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <h5 class="card-title">👥 Total Users</h5>
-            <h2 class="text-primary">{{ totalUsers }}</h2>
-            <p class="text-muted">Registered users</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-3 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <h5 class="card-title">⭐ Total Reviews</h5>
-            <h2 class="text-success">{{ totalReviews }}</h2>
-            <p class="text-muted">User reviews</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-3 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <h5 class="card-title">📊 Avg Rating</h5>
-            <h2 class="text-info">{{ averageRating }}</h2>
-            <p class="text-muted">Overall rating</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-3 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <h5 class="card-title">🛍️ Products</h5>
-            <h2 class="text-warning">{{ products.length }}</h2>
-            <p class="text-muted">Available products</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- User Management -->
-      <div class="col-md-6 mb-4">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">👥 User Management</h5>
-            <button @click="refreshUsers" class="btn btn-outline-primary btn-sm">Refresh</button>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="user in users" :key="user.id">
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                      <span :class="user.role === 'admin' ? 'badge bg-danger' : 'badge bg-primary'">
-                        {{ user.role }}
-                      </span>
-                    </td>
-                    <td>
-                      <button 
-                        @click="toggleUserRole(user.id)" 
-                        class="btn btn-outline-warning btn-sm"
-                        :disabled="user.id === currentUser?.id"
-                      >
-                        {{ user.role === 'admin' ? 'Make User' : 'Make Admin' }}
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="col-md-4 text-end">
+            <div class="admin-stats">
+              <span class="stat-badge">👥 {{ totalUsers }} Users</span>
+              <span class="stat-badge">💬 {{ totalSessions }} Sessions</span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Review Management -->
-      <div class="col-md-6 mb-4">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">⭐ Review Management</h5>
-            <button @click="refreshReviews" class="btn btn-outline-primary btn-sm">Refresh</button>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Rating</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="review in reviews" :key="review.id">
-                    <td>{{ review.userName }}</td>
-                    <td>
-                      <span class="text-warning">
-                        <span v-for="star in 5" :key="star" :class="star <= review.rating ? 'text-warning' : 'text-muted'">
-                          ★
-                        </span>
-                      </span>
-                    </td>
-                    <td>{{ formatDate(review.date) }}</td>
-                    <td>
-                      <button @click="viewReview(review)" class="btn btn-outline-info btn-sm me-1">
-                        View
-                      </button>
-                      <button @click="deleteReview(review.id)" class="btn btn-outline-danger btn-sm">
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- System Settings -->
-      <div class="col-md-6 mb-4">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">⚙️ System Settings</h5>
-          </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label">Application Name</label>
-              <input type="text" class="form-control" v-model="settings.appName" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Maintenance Mode</label>
-              <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" v-model="settings.maintenanceMode" />
-                <label class="form-check-label">Enable maintenance mode</label>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Max Reviews Per User</label>
-              <input type="number" class="form-control" v-model="settings.maxReviewsPerUser" min="1" max="100" />
-            </div>
-            <button @click="saveSettings" class="btn btn-primary">Save Settings</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Security Logs -->
-      <div class="col-md-6 mb-4">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">🛡️ Security Logs</h5>
-          </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <div v-for="log in securityLogs" :key="log.id" class="border-bottom pb-2 mb-2">
-                <div class="d-flex justify-content-between">
-                  <span class="small">{{ log.action }}</span>
-                  <span class="small text-muted">{{ formatTime(log.timestamp) }}</span>
-                </div>
-                <div class="small text-muted">{{ log.details }}</div>
-              </div>
-            </div>
-            <button @click="clearLogs" class="btn btn-outline-secondary btn-sm">Clear Logs</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Review Detail Modal -->
-    <div class="modal fade" id="reviewModal" tabindex="-1">
-      <div class="modal-dialog">
+    <div class="container">
+      <!-- Statistics Overview -->
+      <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ totalUsers }}</h3>
+              <p class="stat-label">Registered Users</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">💬</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ totalSessions }}</h3>
+              <p class="stat-label">Counseling Sessions</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ completedSessions }}</h3>
+              <p class="stat-label">Completed</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ averageRating.toFixed(1) }}</h3>
+              <p class="stat-label">Average Rating</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- User Management -->
+        <div class="col-lg-8 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Student Management</h5>
+              <button @click="refreshData" class="btn btn-light btn-sm">
+                🔄 Refresh
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Age</th>
+                      <th>Registration Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="user in students" :key="user.id">
+                      <td>
+                        <div class="user-info">
+                          <div class="user-avatar">{{ user.name.charAt(0) }}</div>
+                          <span>{{ user.name }}</span>
+                        </div>
+                      </td>
+                      <td>{{ user.email }}</td>
+                      <td>{{ user.age }} years</td>
+                      <td>{{ formatDate(user.registrationDate) }}</td>
+                      <td>
+                        <span class="badge bg-success">Active</span>
+                      </td>
+                      <td>
+                        <button @click="viewUserDetails(user)" class="btn btn-outline-primary btn-sm">
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-gradient-success text-white">
+              <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <div class="quick-actions">
+                <button @click="createArticle" class="quick-action-item">
+                  <div class="action-icon">📝</div>
+                  <div class="action-text">
+                    <h6>Publish Article</h6>
+                    <p class="small text-muted">Share mental health knowledge</p>
+                  </div>
+                </button>
+                
+                <button @click="viewPendingSessions" class="quick-action-item">
+                  <div class="action-icon">⏰</div>
+                  <div class="action-text">
+                    <h6>Pending Sessions</h6>
+                    <p class="small text-muted">View pending session requests</p>
+                  </div>
+                </button>
+                
+                <button @click="generateReport" class="quick-action-item">
+                  <div class="action-icon">📊</div>
+                  <div class="action-text">
+                    <h6>Generate Report</h6>
+                    <p class="small text-muted">View service statistics report</p>
+                  </div>
+                </button>
+                
+                <button @click="manageAssessments" class="quick-action-item">
+                  <div class="action-icon">📋</div>
+                  <div class="action-text">
+                    <h6>Manage Assessments</h6>
+                    <p class="small text-muted">Set up mental assessment tools</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Status -->
+          <div class="card shadow-sm mt-4">
+            <div class="card-header bg-gradient-info text-white">
+              <h5 class="mb-0">System Status</h5>
+            </div>
+            <div class="card-body">
+              <div class="system-status">
+                <div class="status-item">
+                  <span class="status-label">Server Status</span>
+                  <span class="status-value online">Online</span>
+                </div>
+                <div class="status-item">
+                  <span class="status-label">Database Connection</span>
+                  <span class="status-value online">Normal</span>
+                </div>
+                <div class="status-item">
+                  <span class="status-label">Security Status</span>
+                  <span class="status-value online">Secure</span>
+                </div>
+                <div class="status-item">
+                  <span class="status-label">Last Updated</span>
+                  <span class="status-value">{{ formatDate(new Date()) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Counseling Sessions -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-gradient-warning text-white">
+              <h5 class="mb-0">Recent Counseling Sessions</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div v-for="session in recentSessions" :key="session.id" class="col-md-6 col-lg-4 mb-3">
+                  <div class="session-card">
+                    <div class="session-header">
+                      <h6 class="session-topic">{{ session.topic }}</h6>
+                      <span :class="getStatusBadgeClass(session.status)">
+                        {{ getStatusText(session.status) }}
+                      </span>
+                    </div>
+                    <div class="session-details">
+                      <p class="student-name">Student: {{ session.studentName }}</p>
+                      <p class="session-description">{{ session.description }}</p>
+                      <div class="session-meta">
+                        <span class="text-muted small">📅 {{ formatDate(session.date) }}</span>
+                        <span v-if="session.rating" class="text-warning small">
+                          ⭐ {{ session.rating }}/5
+                        </span>
+                      </div>
+                    </div>
+                    <div class="session-actions">
+                      <button @click="viewSessionDetails(session)" class="btn btn-outline-primary btn-sm">
+                        View Details
+                      </button>
+                      <button v-if="session.status === 'pending'" @click="confirmSession(session)" class="btn btn-success btn-sm">
+                        Confirm
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div class="modal fade" id="userDetailsModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Review Details</h5>
+            <h5 class="modal-title">Student Details</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          <div class="modal-body" v-if="selectedReview">
-            <div class="mb-3">
-              <strong>User:</strong> {{ selectedReview.userName }}
-            </div>
-            <div class="mb-3">
-              <strong>Rating:</strong>
-              <span class="text-warning">
-                <span v-for="star in 5" :key="star" :class="star <= selectedReview.rating ? 'text-warning' : 'text-muted'">
-                  ★
-                </span>
-              </span>
-            </div>
-            <div class="mb-3">
-              <strong>Comment:</strong>
-              <p class="mt-2">{{ selectedReview.comment }}</p>
-            </div>
-            <div class="mb-3">
-              <strong>Date:</strong> {{ formatDate(selectedReview.date) }}
+          <div class="modal-body" v-if="selectedUser">
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <div class="user-avatar-large">{{ selectedUser.name.charAt(0) }}</div>
+                <h5 class="mt-3">{{ selectedUser.name }}</h5>
+                <p class="text-muted">{{ selectedUser.email }}</p>
+              </div>
+              <div class="col-md-8">
+                <h6>Basic Information</h6>
+                <ul class="list-unstyled">
+                  <li><strong>Age:</strong> {{ selectedUser.age }} years</li>
+                  <li><strong>Registration Date:</strong> {{ formatDate(selectedUser.registrationDate) }}</li>
+                  <li><strong>User Type:</strong> {{ selectedUser.role === 'student' ? 'Student' : 'Counselor' }}</li>
+                </ul>
+                
+                <h6 class="mt-3">Counseling History</h6>
+                <div v-if="userSessions.length > 0">
+                  <div v-for="session in userSessions.slice(0, 3)" :key="session.id" class="session-summary">
+                    <p class="mb-1"><strong>{{ session.topic }}</strong></p>
+                    <p class="text-muted small mb-1">{{ formatDate(session.date) }}</p>
+                    <span :class="getStatusBadgeClass(session.status)">
+                      {{ getStatusText(session.status) }}
+                    </span>
+                  </div>
+                </div>
+                <p v-else class="text-muted">No counseling records</p>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button @click="contactUser" class="btn btn-primary">Contact Student</button>
           </div>
         </div>
       </div>
@@ -228,107 +273,117 @@
 </template>
 
 <script>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 
 export default {
   name: 'Admin',
   setup() {
     const store = useStore()
-    const router = useRouter()
+    const selectedUser = ref(null)
 
-    const selectedReview = ref(null)
-    const settings = reactive({
-      appName: 'Vue.js 3 Application',
-      maintenanceMode: false,
-      maxReviewsPerUser: 10
+    // Statistics data
+    const totalUsers = computed(() => store.getters.totalUsers)
+    const totalSessions = computed(() => store.getters.totalSessions)
+    const completedSessions = computed(() => store.getters.completedSessions)
+    const averageRating = computed(() => store.getters.averageSessionRating)
+
+    // User data
+    const students = computed(() => 
+      store.state.users.filter(user => user.role === 'student')
+    )
+
+    // Session data
+    const recentSessions = computed(() => 
+      store.state.sessions.slice(0, 6)
+    )
+
+    const userSessions = computed(() => {
+      if (!selectedUser.value) return []
+      return store.getters.userSessions(selectedUser.value.id)
     })
 
-    const securityLogs = ref([
-      { id: 1, action: 'User Login', details: 'admin@example.com logged in', timestamp: new Date() },
-      { id: 2, action: 'Review Deleted', details: 'Review #3 deleted by admin', timestamp: new Date(Date.now() - 3600000) },
-      { id: 3, action: 'User Role Changed', details: 'User role updated to admin', timestamp: new Date(Date.now() - 7200000) }
-    ])
-
-    const currentUser = computed(() => store.getters.currentUser)
-    const isAdmin = computed(() => store.getters.isAdmin)
-    const users = computed(() => [
-      { id: 1, name: 'Admin User', email: 'admin@example.com', role: 'admin' },
-      { id: 2, name: 'Regular User', email: 'user@example.com', role: 'user' }
-    ])
-    const reviews = computed(() => store.state.reviews)
-    const products = computed(() => store.state.products)
-    const totalUsers = computed(() => users.value.length)
-    const totalReviews = computed(() => reviews.value.length)
-    const averageRating = computed(() => store.getters.averageRating)
-
-    const formatDate = (dateString) => {
-      return new Date(dateString).toLocaleDateString('en-US', {
+    const formatDate = (date) => {
+      return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       })
     }
 
-    const formatTime = (timestamp) => {
-      return new Date(timestamp).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+    const getStatusBadgeClass = (status) => {
+      const classes = {
+        'pending': 'badge bg-warning',
+        'confirmed': 'badge bg-info',
+        'completed': 'badge bg-success',
+        'cancelled': 'badge bg-danger'
+      }
+      return classes[status] || 'badge bg-secondary'
     }
 
-    const refreshUsers = () => {
-      console.log('Refreshing users...')
+    const getStatusText = (status) => {
+      const texts = {
+        'pending': 'Pending',
+        'confirmed': 'Confirmed',
+        'completed': 'Completed',
+        'cancelled': 'Cancelled'
+      }
+      return texts[status] || status
     }
 
-    const refreshReviews = () => {
-      console.log('Refreshing reviews...')
+    // Action methods
+    const refreshData = () => {
+      // Simulate data refresh
+      console.log('Refreshing data...')
     }
 
-    const toggleUserRole = (userId) => {
-      console.log(`Toggling role for user ${userId}`)
-      // In a real app, this would make an API call
-    }
-
-    const viewReview = (review) => {
-      selectedReview.value = review
-      const modal = new bootstrap.Modal(document.getElementById('reviewModal'))
+    const viewUserDetails = (user) => {
+      selectedUser.value = user
+      const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'))
       modal.show()
     }
 
-    const deleteReview = (reviewId) => {
-      if (confirm('Are you sure you want to delete this review?')) {
-        console.log(`Deleting review ${reviewId}`)
-        // In a real app, this would make an API call
-      }
+    const contactUser = () => {
+      alert('Contact feature under development...')
     }
 
-    const saveSettings = () => {
-      console.log('Saving settings:', settings)
-      alert('Settings saved successfully!')
+    const createArticle = () => {
+      alert('Article publishing feature under development...')
     }
 
-    const clearLogs = () => {
-      if (confirm('Are you sure you want to clear all security logs?')) {
-        securityLogs.value = []
-        alert('Security logs cleared!')
-      }
+    const viewPendingSessions = () => {
+      alert('Pending sessions feature under development...')
+    }
+
+    const generateReport = () => {
+      alert('Report generation feature under development...')
+    }
+
+    const manageAssessments = () => {
+      alert('Assessment management feature under development...')
+    }
+
+    const viewSessionDetails = (session) => {
+      alert(`View session details: ${session.topic}`)
+    }
+
+    const confirmSession = (session) => {
+      // Update session status
+      store.commit('UPDATE_SESSION', {
+        id: session.id,
+        status: 'confirmed'
+      })
+      alert('Session confirmed')
     }
 
     onMounted(() => {
-      // Ensure user is authenticated and is admin
-      if (!store.getters.isAuthenticated) {
-        router.push('/login')
+      // Ensure user is counselor
+      if (!store.getters.isCounselor) {
+        alert('You do not have access permission')
         return
       }
 
-      if (!store.getters.isAdmin) {
-        router.push('/dashboard')
-        return
-      }
-
-      // Load Bootstrap JS if not available
+      // Load Bootstrap JS
       if (typeof window !== 'undefined' && !window.bootstrap) {
         const script = document.createElement('script')
         script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'
@@ -337,57 +392,278 @@ export default {
     })
 
     return {
-      currentUser,
-      isAdmin,
-      users,
-      reviews,
-      products,
+      selectedUser,
       totalUsers,
-      totalReviews,
+      totalSessions,
+      completedSessions,
       averageRating,
-      selectedReview,
-      settings,
-      securityLogs,
+      students,
+      recentSessions,
+      userSessions,
       formatDate,
-      formatTime,
-      refreshUsers,
-      refreshReviews,
-      toggleUserRole,
-      viewReview,
-      deleteReview,
-      saveSettings,
-      clearLogs
+      getStatusBadgeClass,
+      getStatusText,
+      refreshData,
+      viewUserDetails,
+      contactUser,
+      createArticle,
+      viewPendingSessions,
+      generateReport,
+      manageAssessments,
+      viewSessionDetails,
+      confirmSession
     }
   }
 }
 </script>
 
 <style scoped>
-.admin {
-  min-height: 80vh;
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 0;
+  border-radius: 0 0 20px 20px;
+}
+
+.admin-stats {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.stat-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-right: 1rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  color: #667eea;
+}
+
+.stat-label {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
 }
 
 .card {
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
 }
 
 .card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  border: none;
+  padding: 1rem 1.5rem;
 }
 
-.table {
-  font-size: 0.875rem;
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.table th {
-  border-top: none;
+.bg-gradient-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.bg-gradient-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+
+.bg-gradient-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.user-avatar-large {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 2rem;
+  margin: 0 auto;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quick-action-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  background: none;
+  transition: all 0.3s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.quick-action-item:hover {
+  background: #f8f9fa;
+  transform: translateX(5px);
+}
+
+.action-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.action-text h6 {
+  margin: 0;
   font-weight: 600;
 }
 
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+.action-text p {
+  margin: 0;
+}
+
+.system-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-value.online {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.session-card {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.session-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.session-topic {
+  margin: 0;
+  font-weight: 600;
+}
+
+.session-details {
+  margin-bottom: 1rem;
+}
+
+.student-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.session-description {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.session-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.session-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.session-summary {
+  padding: 0.5rem;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    text-align: center;
+  }
+  
+  .admin-stats {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .stat-card {
+    margin-bottom: 1rem;
+  }
 }
 </style>

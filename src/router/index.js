@@ -5,7 +5,7 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import Admin from '../views/Admin.vue'
-import Reviews from '../views/Reviews.vue'
+import Community from '../views/Reviews.vue'
 
 const routes = [
   {
@@ -35,12 +35,13 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     component: Admin,
-    meta: { requiresAuth: true, requiresAdmin: true }
+    meta: { requiresAuth: true, requiresCounselor: true }
   },
   {
-    path: '/reviews',
-    name: 'Reviews',
-    component: Reviews
+    path: '/community',
+    name: 'Community',
+    component: Community,
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -53,7 +54,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const store = useStore()
   const isAuthenticated = store.getters.isAuthenticated
-  const isAdmin = store.getters.isAdmin
+  const isCounselor = store.getters.isCounselor
 
   // Routes that require authentication
   if (to.matched.some(record => record.meta.requiresAuth)) {
@@ -63,9 +64,9 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // Routes that require admin role
-  if (to.matched.some(record => record.meta.requiresAdmin)) {
-    if (!isAdmin) {
+  // Routes that require counselor role
+  if (to.matched.some(record => record.meta.requiresCounselor)) {
+    if (!isCounselor) {
       next('/dashboard')
       return
     }

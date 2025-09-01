@@ -1,167 +1,208 @@
 <template>
-  <div class="dashboard">
-    <div class="row">
-      <!-- Welcome Section -->
-      <div class="col-12 mb-4">
-        <div class="card bg-primary text-white">
-          <div class="card-body">
-            <h2 class="card-title">Welcome, {{ currentUser?.name || 'User' }}!</h2>
-            <p class="card-text">Role: <span class="badge bg-light text-dark">{{ currentUser?.role || 'user' }}</span></p>
+  <div class="dashboard-container">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner mb-4">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h2 class="text-white mb-2">Welcome back, {{ currentUser.name }}!</h2>
+            <p class="text-white-50 mb-0">
+              {{ isCounselor ? 'Continue providing professional mental health support for youth' : 'Continue your mental health growth journey' }}
+            </p>
           </div>
-        </div>
-      </div>
-
-      <!-- User Stats -->
-      <div class="col-md-4 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <h5 class="card-title">📊 Your Reviews</h5>
-            <h2 class="text-primary">{{ userReviews.length }}</h2>
-            <p class="text-muted">Total reviews submitted</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-4 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <h5 class="card-title">⭐ Average Rating</h5>
-            <h2 class="text-success">{{ userAverageRating }}</h2>
-            <p class="text-muted">Your average review rating</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-4 mb-4">
-        <div class="card text-center">
-          <div class="card-body">
-            <h5 class="card-title">🛍️ Products</h5>
-            <h2 class="text-info">{{ products.length }}</h2>
-            <p class="text-muted">Available products</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- User Reviews -->
-      <div class="col-md-8 mb-4">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Your Recent Reviews</h5>
-            <router-link to="/reviews" class="btn btn-outline-primary btn-sm">View All</router-link>
-          </div>
-          <div class="card-body">
-            <div v-if="userReviews.length === 0" class="text-center py-4">
-              <p class="text-muted">No reviews yet. <router-link to="/reviews">Write your first review!</router-link></p>
-            </div>
-            <div v-else>
-              <div v-for="review in userReviews.slice(0, 3)" :key="review.id" class="border-bottom pb-3 mb-3">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div>
-                    <p class="mb-1">{{ review.comment }}</p>
-                    <small class="text-muted">{{ formatDate(review.date) }}</small>
-                  </div>
-                  <div class="text-warning">
-                    <span v-for="star in 5" :key="star" :class="star <= review.rating ? 'text-warning' : 'text-muted'">
-                      ★
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="col-md-4 mb-4">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">Quick Actions</h5>
-          </div>
-          <div class="card-body">
-            <div class="d-grid gap-2">
-              <router-link to="/reviews" class="btn btn-primary">
-                Write a Review
-              </router-link>
-              <button @click="refreshData" class="btn btn-outline-secondary">
-                Refresh Data
-              </button>
-              <button v-if="isAdmin" @click="goToAdmin" class="btn btn-warning">
-                Admin Panel
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Catalog -->
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">Product Catalog</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div v-for="product in products" :key="product.id" class="col-md-4 mb-3">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h6 class="card-title">{{ product.name }}</h6>
-                    <p class="card-text">
-                      <span class="badge bg-primary me-2">${{ product.price }}</span>
-                      <span class="text-warning">★ {{ product.rating }}</span>
-                    </p>
-                    <button @click="rateProduct(product.id)" class="btn btn-outline-primary btn-sm">
-                      Rate Product
-                    </button>
-                  </div>
-                </div>
-              </div>
+          <div class="col-md-4 text-end">
+            <div class="user-avatar">
+              <span class="avatar-text">{{ currentUser.name.charAt(0) }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Rating Modal -->
-    <div class="modal fade" id="ratingModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Rate Product</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="container">
+      <!-- Statistics Cards -->
+      <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ totalSessions }}</h3>
+              <p class="stat-label">Counseling Sessions</p>
+            </div>
           </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">Rating:</label>
-              <div class="rating">
-                <input type="radio" id="star5" name="rating" value="5" v-model="selectedRating" />
-                <label for="star5"></label>
-                <input type="radio" id="star4" name="rating" value="4" v-model="selectedRating" />
-                <label for="star4"></label>
-                <input type="radio" id="star3" name="rating" value="3" v-model="selectedRating" />
-                <label for="star3"></label>
-                <input type="radio" id="star2" name="rating" value="2" v-model="selectedRating" />
-                <label for="star2"></label>
-                <input type="radio" id="star1" name="rating" value="1" v-model="selectedRating" />
-                <label for="star1"></label>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ averageRating.toFixed(1) }}</h3>
+              <p class="stat-label">Average Rating</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ totalArticles }}</h3>
+              <p class="stat-label">Mental Health Articles</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ totalAssessments }}</h3>
+              <p class="stat-label">Mental Assessments</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Recent Sessions -->
+        <div class="col-lg-8 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-gradient-primary text-white">
+              <h5 class="mb-0">
+                {{ isCounselor ? 'Recent Counseling Sessions' : 'My Counseling Records' }}
+              </h5>
+            </div>
+            <div class="card-body">
+              <div v-if="userSessions.length === 0" class="text-center py-4">
+                <div class="empty-state">
+                  <div class="empty-icon">💬</div>
+                  <h6 class="text-muted">No counseling records yet</h6>
+                  <p class="text-muted small">
+                    {{ isCounselor ? 'Start providing counseling services for youth' : 'Book your first counseling session' }}
+                  </p>
+                  <router-link to="/community" class="btn btn-primary">
+                    {{ isCounselor ? 'View Session Requests' : 'Book Session' }}
+                  </router-link>
+                </div>
+              </div>
+              <div v-else>
+                <div v-for="session in userSessions.slice(0, 5)" :key="session.id" class="session-item">
+                  <div class="session-header">
+                    <div class="session-info">
+                      <h6 class="mb-1">{{ session.topic }}</h6>
+                      <p class="text-muted small mb-0">
+                        {{ isCounselor ? `Student: ${session.studentName}` : `Counselor: ${session.counselorName}` }}
+                      </p>
+                    </div>
+                    <div class="session-status">
+                      <span :class="getStatusBadgeClass(session.status)">
+                        {{ getStatusText(session.status) }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="session-details">
+                    <p class="text-muted small mb-2">{{ session.description }}</p>
+                    <div class="session-meta">
+                      <span class="text-muted small">
+                        📅 {{ formatDate(session.date) }}
+                      </span>
+                      <span v-if="session.rating" class="text-warning small">
+                        ⭐ {{ session.rating }}/5
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="mb-3">
-              <label for="reviewComment" class="form-label">Comment:</label>
-              <textarea
-                id="reviewComment"
-                class="form-control"
-                v-model="reviewComment"
-                rows="3"
-                placeholder="Share your thoughts about this product..."
-              ></textarea>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4 mb-4">
+          <div class="card shadow-sm">
+            <div class="card-header bg-gradient-success text-white">
+              <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <div class="quick-actions">
+                <router-link to="/community" class="quick-action-item">
+                  <div class="action-icon">💬</div>
+                  <div class="action-text">
+                    <h6>Book Session</h6>
+                    <p class="small text-muted">Connect with professional counselors</p>
+                  </div>
+                </router-link>
+                
+                <router-link to="/assessments" class="quick-action-item">
+                  <div class="action-icon">📋</div>
+                  <div class="action-text">
+                    <h6>Mental Assessment</h6>
+                    <p class="small text-muted">Understand your mental health status</p>
+                  </div>
+                </router-link>
+                
+                <router-link to="/resources" class="quick-action-item">
+                  <div class="action-icon">📚</div>
+                  <div class="action-text">
+                    <h6>Mental Health Resources</h6>
+                    <p class="small text-muted">Read professional articles and resources</p>
+                  </div>
+                </router-link>
+                
+                <div v-if="isCounselor" class="quick-action-item">
+                  <div class="action-icon">👥</div>
+                  <div class="action-text">
+                    <h6>Manage Students</h6>
+                    <p class="small text-muted">View and manage student information</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button @click="submitRating" class="btn btn-primary" :disabled="!selectedRating">
-              Submit Rating
-            </button>
+
+          <!-- Mental Health Tips -->
+          <div class="card shadow-sm mt-4">
+            <div class="card-header bg-gradient-info text-white">
+              <h5 class="mb-0">💡 Mental Health Tips</h5>
+            </div>
+            <div class="card-body">
+              <div class="tip-content">
+                <h6>Today's Tip</h6>
+                <p class="small text-muted">
+                  Maintain a regular sleep schedule and ensure 7-8 hours of sleep daily, which is crucial for mental health.
+                </p>
+                <div class="tip-footer">
+                  <small class="text-muted">Updated {{ formatDate(new Date()) }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mental Health Articles -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-gradient-warning text-white">
+              <h5 class="mb-0">📖 Recommended Reading</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div v-for="article in articles.slice(0, 3)" :key="article.id" class="col-md-4 mb-3">
+                  <div class="article-card">
+                    <div class="article-image">
+                      <div class="image-placeholder">{{ article.category }}</div>
+                    </div>
+                    <div class="article-content">
+                      <h6 class="article-title">{{ article.title }}</h6>
+                      <p class="article-excerpt">{{ article.excerpt }}</p>
+                      <div class="article-meta">
+                        <span class="text-muted small">📅 {{ formatDate(article.date) }}</span>
+                        <span class="text-primary small">👁️ {{ article.views }} reads</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -170,166 +211,310 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 
 export default {
   name: 'Dashboard',
   setup() {
     const store = useStore()
-    const router = useRouter()
 
-    const selectedRating = ref(0)
-    const reviewComment = ref('')
-    const selectedProductId = ref(null)
+    const currentUser = computed(() => store.state.currentUser)
+    const isCounselor = computed(() => store.getters.isCounselor)
+    const isStudent = computed(() => store.getters.isStudent)
 
-    const currentUser = computed(() => store.getters.currentUser)
-    const isAdmin = computed(() => store.getters.isAdmin)
-    const products = computed(() => store.state.products)
-    const userReviews = computed(() => 
-      store.state.reviews.filter(review => review.userId === currentUser.value?.id)
-    )
-    const userAverageRating = computed(() => {
-      if (userReviews.value.length === 0) return '0.0'
-      const total = userReviews.value.reduce((sum, review) => sum + review.rating, 0)
-      return (total / userReviews.value.length).toFixed(1)
+    const totalSessions = computed(() => store.getters.totalSessions)
+    const averageRating = computed(() => store.getters.averageSessionRating)
+    const totalArticles = computed(() => store.state.articles.length)
+    const totalAssessments = computed(() => store.state.assessments.length)
+
+    const userSessions = computed(() => {
+      if (isCounselor.value) {
+        return store.getters.counselorSessions(currentUser.value.id)
+      } else {
+        return store.getters.userSessions(currentUser.value.id)
+      }
     })
 
-    const formatDate = (dateString) => {
-      return new Date(dateString).toLocaleDateString('en-US', {
+    const articles = computed(() => store.state.articles)
+
+    const formatDate = (date) => {
+      return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       })
     }
 
-    const refreshData = () => {
-      // Simulate data refresh
-      console.log('Refreshing data...')
-    }
-
-    const goToAdmin = () => {
-      router.push('/admin')
-    }
-
-    const rateProduct = (productId) => {
-      selectedProductId.value = productId
-      selectedRating.value = 0
-      reviewComment.value = ''
-      
-      // Show modal
-      const modal = new bootstrap.Modal(document.getElementById('ratingModal'))
-      modal.show()
-    }
-
-    const submitRating = async () => {
-      if (!selectedRating.value) {
-        alert('Please select a rating')
-        return
+    const getStatusBadgeClass = (status) => {
+      const classes = {
+        'pending': 'badge bg-warning',
+        'confirmed': 'badge bg-info',
+        'completed': 'badge bg-success',
+        'cancelled': 'badge bg-danger'
       }
+      return classes[status] || 'badge bg-secondary'
+    }
 
-      try {
-        const review = {
-          userId: currentUser.value.id,
-          userName: currentUser.value.name,
-          rating: selectedRating.value,
-          comment: reviewComment.value || 'No comment provided',
-          productId: selectedProductId.value
-        }
-
-        await store.dispatch('addReview', review)
-        
-        // Close modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'))
-        modal.hide()
-        
-        // Reset form
-        selectedRating.value = 0
-        reviewComment.value = ''
-        selectedProductId.value = null
-        
-        alert('Review submitted successfully!')
-      } catch (error) {
-        alert('Failed to submit review. Please try again.')
+    const getStatusText = (status) => {
+      const texts = {
+        'pending': 'Pending',
+        'confirmed': 'Confirmed',
+        'completed': 'Completed',
+        'cancelled': 'Cancelled'
       }
+      return texts[status] || status
     }
 
     onMounted(() => {
-      // Ensure user is authenticated
-      if (!store.getters.isAuthenticated) {
-        router.push('/login')
-        return
-      }
-
-      // Load Bootstrap JS if not available
-      if (typeof window !== 'undefined' && !window.bootstrap) {
-        const script = document.createElement('script')
-        script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'
-        document.head.appendChild(script)
-      }
+      // Can load user-specific data here
     })
 
     return {
       currentUser,
-      isAdmin,
-      products,
-      userReviews,
-      userAverageRating,
-      selectedRating,
-      reviewComment,
+      isCounselor,
+      isStudent,
+      totalSessions,
+      averageRating,
+      totalArticles,
+      totalAssessments,
+      userSessions,
+      articles,
       formatDate,
-      refreshData,
-      goToAdmin,
-      rateProduct,
-      submitRating
+      getStatusBadgeClass,
+      getStatusText
     }
   }
 }
 </script>
 
 <style scoped>
-.dashboard {
-  min-height: 80vh;
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.welcome-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 0;
+  border-radius: 0 0 20px 20px;
+}
+
+.user-avatar {
+  display: inline-block;
+}
+
+.avatar-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-right: 1rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  color: #667eea;
+}
+
+.stat-label {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
 }
 
 .card {
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
 }
 
 .card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  border: none;
+  padding: 1rem 1.5rem;
 }
 
-.rating {
-  display: inline-block;
-  font-size: 0;
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.rating input {
-  display: none;
+.bg-gradient-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 }
 
-.rating label {
-  float: right;
-  padding: 0 0.1em;
-  font-size: 1.5em;
-  color: #ddd;
-  cursor: pointer;
+.bg-gradient-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
 }
 
-.rating label:before {
-  content: '★';
+.bg-gradient-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
 }
 
-.rating input:checked ~ label {
-  color: #ffd700;
+.session-item {
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 0;
 }
 
-.rating label:hover,
-.rating label:hover ~ label {
-  color: #ffd700;
+.session-item:last-child {
+  border-bottom: none;
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.session-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quick-action-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.quick-action-item:hover {
+  background: #f8f9fa;
+  transform: translateX(5px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.action-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.action-text h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.action-text p {
+  margin: 0;
+}
+
+.empty-state {
+  padding: 2rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.article-card {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.article-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.article-image {
+  height: 120px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-placeholder {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.article-content {
+  padding: 1rem;
+}
+
+.article-title {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.article-excerpt {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.article-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tip-content h6 {
+  color: #17a2b8;
+  margin-bottom: 0.5rem;
+}
+
+.tip-footer {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+@media (max-width: 768px) {
+  .welcome-banner {
+    text-align: center;
+  }
+  
+  .user-avatar {
+    margin-top: 1rem;
+  }
+  
+  .stat-card {
+    margin-bottom: 1rem;
+  }
 }
 </style>

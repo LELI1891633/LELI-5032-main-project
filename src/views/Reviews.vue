@@ -1,12 +1,12 @@
 <template>
-  <div class="reviews">
+  <div class="community-container">
     <div class="row">
       <!-- Header Section -->
       <div class="col-12 mb-4">
-        <div class="card bg-info text-white">
+        <div class="card bg-gradient-primary text-white">
           <div class="card-body text-center">
-            <h2 class="card-title">⭐ Reviews & Ratings</h2>
-            <p class="card-text">See what others are saying about our products</p>
+            <h2 class="card-title">💬 Community & Support</h2>
+            <p class="card-text">Connect with others and share your mental health journey</p>
           </div>
         </div>
       </div>
@@ -15,14 +15,14 @@
       <div class="col-md-4 mb-4">
         <div class="card text-center">
           <div class="card-body">
-            <h5 class="card-title">📊 Overall Rating</h5>
+            <h5 class="card-title">📊 Community Rating</h5>
             <h2 class="text-primary">{{ averageRating }}</h2>
             <div class="text-warning mb-2">
               <span v-for="star in 5" :key="star" :class="star <= Math.round(averageRating) ? 'text-warning' : 'text-muted'">
                 ★
               </span>
             </div>
-            <p class="text-muted">Based on {{ totalReviews }} reviews</p>
+            <p class="text-muted">Based on {{ totalSessions }} sessions</p>
           </div>
         </div>
       </div>
@@ -30,7 +30,7 @@
       <div class="col-md-4 mb-4">
         <div class="card text-center">
           <div class="card-body">
-            <h5 class="card-title">📈 Rating Distribution</h5>
+            <h5 class="card-title">📈 Session Distribution</h5>
             <div class="rating-distribution">
               <div v-for="rating in 5" :key="rating" class="d-flex align-items-center mb-1">
                 <span class="me-2">{{ rating }}★</span>
@@ -50,94 +50,95 @@
       <div class="col-md-4 mb-4">
         <div class="card text-center">
           <div class="card-body">
-            <h5 class="card-title">✍️ Write a Review</h5>
-            <p class="card-text">Share your experience with our products</p>
-            <button @click="showReviewForm = true" class="btn btn-primary">
-              Write Review
+            <h5 class="card-title">✍️ Share Experience</h5>
+            <p class="card-text">Share your mental health journey with the community</p>
+            <button @click="showSessionForm = true" class="btn btn-primary">
+              Book Session
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Review Form Modal -->
-      <div v-if="showReviewForm" class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
+      <!-- Session Booking Modal -->
+      <div v-if="showSessionForm" class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Write a Review</h5>
-              <button type="button" class="btn-close" @click="closeReviewForm"></button>
+              <h5 class="modal-title">Book a Counseling Session</h5>
+              <button type="button" class="btn-close" @click="closeSessionForm"></button>
             </div>
             <div class="modal-body">
-              <form @submit.prevent="submitReview">
-                <!-- Product Selection -->
+              <form @submit.prevent="submitSession">
+                <!-- Counselor Selection -->
                 <div class="mb-3">
-                  <label for="productSelect" class="form-label">Select Product</label>
+                  <label for="counselorSelect" class="form-label">Select Counselor</label>
                   <select 
-                    id="productSelect" 
+                    id="counselorSelect" 
                     class="form-select" 
-                    v-model="reviewForm.productId"
+                    v-model="sessionForm.counselorId"
                     required
                   >
-                    <option value="">Choose a product...</option>
-                    <option v-for="product in products" :key="product.id" :value="product.id">
-                      {{ product.name }} - ${{ product.price }}
+                    <option value="">Choose a counselor...</option>
+                    <option v-for="counselor in counselors" :key="counselor.id" :value="counselor.id">
+                      {{ counselor.name }} - {{ counselor.specialization }}
                     </option>
                   </select>
                 </div>
 
-                <!-- Rating -->
+                <!-- Session Topic -->
                 <div class="mb-3">
-                  <label class="form-label">Rating</label>
-                  <div class="rating">
-                    <input type="radio" id="star5" name="rating" value="5" v-model="reviewForm.rating" />
-                    <label for="star5"></label>
-                    <input type="radio" id="star4" name="rating" value="4" v-model="reviewForm.rating" />
-                    <label for="star4"></label>
-                    <input type="radio" id="star3" name="rating" value="3" v-model="reviewForm.rating" />
-                    <label for="star3"></label>
-                    <input type="radio" id="star2" name="rating" value="2" v-model="reviewForm.rating" />
-                    <label for="star2"></label>
-                    <input type="radio" id="star1" name="rating" value="1" v-model="reviewForm.rating" />
-                    <label for="star1"></label>
-                  </div>
-                  <div v-if="reviewForm.rating" class="mt-2">
-                    <span class="text-warning">
-                      <span v-for="star in 5" :key="star" :class="star <= reviewForm.rating ? 'text-warning' : 'text-muted'">
-                        ★
-                      </span>
-                    </span>
-                    <span class="ms-2">{{ reviewForm.rating }} out of 5</span>
-                  </div>
+                  <label for="sessionTopic" class="form-label">Session Topic</label>
+                  <input
+                    type="text"
+                    id="sessionTopic"
+                    class="form-control"
+                    v-model="sessionForm.topic"
+                    placeholder="e.g., Anxiety, Depression, Academic Stress..."
+                    required
+                  />
                 </div>
 
-                <!-- Comment -->
+                <!-- Session Description -->
                 <div class="mb-3">
-                  <label for="reviewComment" class="form-label">Your Review</label>
+                  <label for="sessionDescription" class="form-label">Session Description</label>
                   <textarea
-                    id="reviewComment"
+                    id="sessionDescription"
                     class="form-control"
-                    v-model="reviewForm.comment"
+                    v-model="sessionForm.description"
                     rows="4"
-                    placeholder="Share your thoughts about this product..."
+                    placeholder="Briefly describe what you'd like to discuss..."
                     required
                   ></textarea>
                   <div class="form-text">
-                    {{ reviewForm.comment.length }}/500 characters
+                    {{ sessionForm.description.length }}/500 characters
                   </div>
+                </div>
+
+                <!-- Preferred Date -->
+                <div class="mb-3">
+                  <label for="sessionDate" class="form-label">Preferred Date</label>
+                  <input
+                    type="date"
+                    id="sessionDate"
+                    class="form-control"
+                    v-model="sessionForm.date"
+                    :min="new Date().toISOString().split('T')[0]"
+                    required
+                  />
                 </div>
 
                 <!-- Submit Button -->
                 <div class="d-flex justify-content-end gap-2">
-                  <button type="button" class="btn btn-secondary" @click="closeReviewForm">
+                  <button type="button" class="btn btn-secondary" @click="closeSessionForm">
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     class="btn btn-primary"
-                    :disabled="!isReviewFormValid || isSubmitting"
+                    :disabled="!isSessionFormValid || isSubmitting"
                   >
                     <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
-                    {{ isSubmitting ? 'Submitting...' : 'Submit Review' }}
+                    {{ isSubmitting ? 'Submitting...' : 'Book Session' }}
                   </button>
                 </div>
               </form>
@@ -146,48 +147,56 @@
         </div>
       </div>
 
-      <!-- Reviews List -->
+      <!-- Sessions List -->
       <div class="col-12">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">All Reviews</h5>
+            <h5 class="mb-0">Community Sessions</h5>
             <div class="d-flex gap-2">
               <select v-model="sortBy" class="form-select form-select-sm" style="width: auto;">
                 <option value="date">Sort by Date</option>
                 <option value="rating">Sort by Rating</option>
-                <option value="name">Sort by Name</option>
+                <option value="topic">Sort by Topic</option>
               </select>
-              <select v-model="filterRating" class="form-select form-select-sm" style="width: auto;">
-                <option value="">All Ratings</option>
-                <option value="5">5 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="2">2 Stars</option>
-                <option value="1">1 Star</option>
+              <select v-model="filterStatus" class="form-select form-select-sm" style="width: auto;">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
           </div>
           <div class="card-body">
-            <div v-if="filteredReviews.length === 0" class="text-center py-5">
-              <p class="text-muted">No reviews found.</p>
+            <div v-if="filteredSessions.length === 0" class="text-center py-5">
+              <p class="text-muted">No sessions found.</p>
             </div>
             <div v-else>
-              <div v-for="review in filteredReviews" :key="review.id" class="review-item border-bottom pb-4 mb-4">
+              <div v-for="session in filteredSessions" :key="session.id" class="session-item border-bottom pb-4 mb-4">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                   <div>
-                    <h6 class="mb-1">{{ review.userName }}</h6>
-                    <div class="text-warning mb-2">
-                      <span v-for="star in 5" :key="star" :class="star <= review.rating ? 'text-warning' : 'text-muted'">
+                    <h6 class="mb-1">{{ session.topic }}</h6>
+                    <p class="text-muted small mb-1">
+                      {{ isCounselor ? `Student: ${session.studentName}` : `Counselor: ${session.counselorName}` }}
+                    </p>
+                    <div v-if="session.rating" class="text-warning mb-2">
+                      <span v-for="star in 5" :key="star" :class="star <= session.rating ? 'text-warning' : 'text-muted'">
                         ★
                       </span>
-                      <span class="ms-2 text-muted">{{ review.rating }}/5</span>
+                      <span class="ms-2 text-muted">{{ session.rating }}/5</span>
                     </div>
                   </div>
-                  <small class="text-muted">{{ formatDate(review.date) }}</small>
+                  <div class="text-end">
+                    <span :class="getStatusBadgeClass(session.status)">
+                      {{ getStatusText(session.status) }}
+                    </span>
+                    <br>
+                    <small class="text-muted">{{ formatDate(session.date) }}</small>
+                  </div>
                 </div>
-                <p class="mb-2">{{ review.comment }}</p>
-                <div v-if="review.productId" class="small text-muted">
-                  Product: {{ getProductName(review.productId) }}
+                <p class="mb-2">{{ session.description }}</p>
+                <div v-if="session.feedback" class="small text-muted">
+                  <strong>Feedback:</strong> {{ session.feedback }}
                 </div>
               </div>
             </div>
@@ -204,43 +213,45 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 
 export default {
-  name: 'Reviews',
+  name: 'Community',
   setup() {
     const store = useStore()
     const router = useRouter()
 
-    const showReviewForm = ref(false)
+    const showSessionForm = ref(false)
     const sortBy = ref('date')
-    const filterRating = ref('')
+    const filterStatus = ref('')
     const isSubmitting = ref(false)
 
-    const reviewForm = reactive({
-      productId: '',
-      rating: 0,
-      comment: ''
+    const sessionForm = reactive({
+      counselorId: '',
+      topic: '',
+      description: '',
+      date: ''
     })
 
-    const reviews = computed(() => store.state.reviews)
-    const products = computed(() => store.state.products)
-    const totalReviews = computed(() => reviews.value.length)
-    const averageRating = computed(() => store.getters.averageRating)
+    const sessions = computed(() => store.state.sessions)
+    const counselors = computed(() => store.state.users.filter(user => user.role === 'counselor'))
+    const totalSessions = computed(() => sessions.value.length)
+    const averageRating = computed(() => store.getters.averageSessionRating)
     const currentUser = computed(() => store.getters.currentUser)
+    const isCounselor = computed(() => store.getters.isCounselor)
 
-    const filteredReviews = computed(() => {
-      let filtered = [...reviews.value]
+    const filteredSessions = computed(() => {
+      let filtered = [...sessions.value]
 
-      // Filter by rating
-      if (filterRating.value) {
-        filtered = filtered.filter(review => review.rating === parseInt(filterRating.value))
+      // Filter by status
+      if (filterStatus.value) {
+        filtered = filtered.filter(session => session.status === filterStatus.value)
       }
 
-      // Sort reviews
+      // Sort sessions
       filtered.sort((a, b) => {
         switch (sortBy.value) {
           case 'rating':
-            return b.rating - a.rating
-          case 'name':
-            return a.userName.localeCompare(b.userName)
+            return (b.rating || 0) - (a.rating || 0)
+          case 'topic':
+            return a.topic.localeCompare(b.topic)
           case 'date':
           default:
             return new Date(b.date) - new Date(a.date)
@@ -250,8 +261,9 @@ export default {
       return filtered
     })
 
-    const isReviewFormValid = computed(() => {
-      return reviewForm.productId && reviewForm.rating > 0 && reviewForm.comment.trim().length > 0
+    const isSessionFormValid = computed(() => {
+      return sessionForm.counselorId && sessionForm.topic.trim() && 
+             sessionForm.description.trim() && sessionForm.date
     })
 
     const formatDate = (dateString) => {
@@ -263,35 +275,51 @@ export default {
     }
 
     const getRatingCount = (rating) => {
-      return reviews.value.filter(review => review.rating === rating).length
+      return sessions.value.filter(session => session.rating === rating).length
     }
 
     const getRatingPercentage = (rating) => {
-      if (totalReviews.value === 0) return 0
-      return Math.round((getRatingCount(rating) / totalReviews.value) * 100)
+      if (totalSessions.value === 0) return 0
+      return Math.round((getRatingCount(rating) / totalSessions.value) * 100)
     }
 
-    const getProductName = (productId) => {
-      const product = products.value.find(p => p.id === productId)
-      return product ? product.name : 'Unknown Product'
+    const getStatusBadgeClass = (status) => {
+      const classes = {
+        'pending': 'badge bg-warning',
+        'confirmed': 'badge bg-info',
+        'completed': 'badge bg-success',
+        'cancelled': 'badge bg-danger'
+      }
+      return classes[status] || 'badge bg-secondary'
     }
 
-    const closeReviewForm = () => {
-      showReviewForm.value = false
+    const getStatusText = (status) => {
+      const texts = {
+        'pending': 'Pending',
+        'confirmed': 'Confirmed',
+        'completed': 'Completed',
+        'cancelled': 'Cancelled'
+      }
+      return texts[status] || status
+    }
+
+    const closeSessionForm = () => {
+      showSessionForm.value = false
       // Reset form
-      reviewForm.productId = ''
-      reviewForm.rating = 0
-      reviewForm.comment = ''
+      sessionForm.counselorId = ''
+      sessionForm.topic = ''
+      sessionForm.description = ''
+      sessionForm.date = ''
     }
 
-    const submitReview = async () => {
+    const submitSession = async () => {
       if (!store.getters.isAuthenticated) {
-        alert('Please log in to submit a review')
+        alert('Please log in to book a session')
         router.push('/login')
         return
       }
 
-      if (!isReviewFormValid.value) {
+      if (!isSessionFormValid.value) {
         alert('Please fill in all required fields')
         return
       }
@@ -299,19 +327,23 @@ export default {
       isSubmitting.value = true
 
       try {
-        const review = {
-          userId: currentUser.value.id,
-          userName: currentUser.value.name,
-          rating: reviewForm.rating,
-          comment: reviewForm.comment.trim(),
-          productId: reviewForm.productId
+        const counselor = counselors.value.find(c => c.id === sessionForm.counselorId)
+        const session = {
+          studentId: currentUser.value.id,
+          studentName: currentUser.value.name,
+          counselorId: sessionForm.counselorId,
+          counselorName: counselor.name,
+          topic: sessionForm.topic.trim(),
+          description: sessionForm.description.trim(),
+          date: sessionForm.date,
+          status: 'pending'
         }
 
-        await store.dispatch('addReview', review)
-        closeReviewForm()
-        alert('Review submitted successfully!')
+        await store.dispatch('bookSession', session)
+        closeSessionForm()
+        alert('Session booked successfully!')
       } catch (error) {
-        alert('Failed to submit review. Please try again.')
+        alert('Failed to book session. Please try again.')
       } finally {
         isSubmitting.value = false
       }
@@ -327,80 +359,61 @@ export default {
     })
 
     return {
-      showReviewForm,
+      showSessionForm,
       sortBy,
-      filterRating,
+      filterStatus,
       isSubmitting,
-      reviewForm,
-      reviews,
-      products,
-      totalReviews,
+      sessionForm,
+      sessions,
+      counselors,
+      totalSessions,
       averageRating,
       currentUser,
-      filteredReviews,
-      isReviewFormValid,
+      isCounselor,
+      filteredSessions,
+      isSessionFormValid,
       formatDate,
       getRatingCount,
       getRatingPercentage,
-      getProductName,
-      closeReviewForm,
-      submitReview
+      getStatusBadgeClass,
+      getStatusText,
+      closeSessionForm,
+      submitSession
     }
   }
 }
 </script>
 
 <style scoped>
-.reviews {
+.community-container {
   min-height: 80vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .card {
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 15px 15px 0 0;
 }
 
-.rating {
-  display: inline-block;
-  font-size: 0;
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.rating input {
-  display: none;
-}
-
-.rating label {
-  float: right;
-  padding: 0 0.1em;
-  font-size: 1.5em;
-  color: #ddd;
-  cursor: pointer;
-}
-
-.rating label:before {
-  content: '★';
-}
-
-.rating input:checked ~ label {
-  color: #ffd700;
-}
-
-.rating label:hover,
-.rating label:hover ~ label {
-  color: #ffd700;
-}
-
-.review-item:last-child {
+.session-item:last-child {
   border-bottom: none !important;
 }
 
 .progress {
   background-color: #e9ecef;
+  border-radius: 10px;
 }
 
 .modal.show {
@@ -410,5 +423,19 @@ export default {
 .form-select-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 </style>

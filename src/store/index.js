@@ -1,39 +1,105 @@
 import { createStore } from 'vuex'
 
-// Mock data for demonstration
+// Mock data
 const mockUsers = [
   {
     id: 1,
-    email: 'admin@example.com',
-    password: 'admin123',
-    name: 'Admin User',
-    role: 'admin'
+    email: 'counselor@example.com',
+    password: 'counselor123',
+    name: 'Dr. Sarah Johnson',
+    role: 'counselor'
   },
   {
     id: 2,
-    email: 'user@example.com',
-    password: 'user123',
-    name: 'Regular User',
-    role: 'user'
+    email: 'student@example.com',
+    password: 'student123',
+    name: 'Alex Chen',
+    role: 'student'
   }
 ]
 
-const mockReviews = [
+const mockSessions = [
   {
     id: 1,
     userId: 2,
-    userName: 'Regular User',
+    userName: 'Alex Chen',
+    counselorName: 'Dr. Sarah Johnson',
+    topic: 'Academic Stress Management',
+    status: 'completed',
     rating: 5,
-    comment: 'Great application! Very user-friendly.',
+    feedback: 'The counselor was very professional and gave me many practical suggestions.',
     date: '2024-01-15'
   },
   {
     id: 2,
-    userId: 1,
-    userName: 'Admin User',
-    rating: 4,
-    comment: 'Good features, but could use some improvements.',
-    date: '2024-01-14'
+    userId: 2,
+    userName: 'Alex Chen',
+    counselorName: 'Dr. Michael Brown',
+    topic: 'Interpersonal Relationships',
+    status: 'scheduled',
+    rating: 0,
+    feedback: '',
+    date: '2024-01-20'
+  }
+]
+
+const mockArticles = [
+  {
+    id: 1,
+    title: 'How to Effectively Manage Academic Stress',
+    category: 'Stress Management',
+    content: 'Academic stress is a common issue among youth. This article introduces several effective stress management methods...',
+    author: 'Dr. Sarah Johnson',
+    views: 1250,
+    rating: 4.8,
+    date: '2024-01-10'
+  },
+  {
+    id: 2,
+    title: 'Practical Techniques for Emotional Regulation',
+    category: 'Emotional Regulation',
+    content: 'Learning to regulate emotions is an important foundation for mental health. Here are some practical techniques...',
+    author: 'Dr. Michael Brown',
+    views: 980,
+    rating: 4.6,
+    date: '2024-01-08'
+  },
+  {
+    id: 3,
+    title: 'Communication Skills to Improve Interpersonal Relationships',
+    category: 'Interpersonal Relationships',
+    content: 'Good interpersonal relationships are crucial for mental health. This article shares effective communication skills...',
+    author: 'Dr. Emily Davis',
+    views: 1100,
+    rating: 4.7,
+    date: '2024-01-05'
+  }
+]
+
+const mockAssessments = [
+  {
+    id: 1,
+    title: 'Stress Level Assessment',
+    description: 'Assess your current stress level and understand stress sources',
+    questions: 20,
+    duration: '10 minutes',
+    category: 'Stress Management'
+  },
+  {
+    id: 2,
+    title: 'Emotional State Assessment',
+    description: 'Understand your emotional state and emotional regulation ability',
+    questions: 15,
+    duration: '8 minutes',
+    category: 'Emotional Regulation'
+  },
+  {
+    id: 3,
+    title: 'Interpersonal Relationship Assessment',
+    description: 'Assess your interpersonal relationship status and social skills',
+    questions: 18,
+    duration: '12 minutes',
+    category: 'Interpersonal Relationships'
   }
 ]
 
@@ -41,25 +107,32 @@ export default createStore({
   state: {
     user: null,
     isAuthenticated: false,
-    reviews: mockReviews,
-    products: [
-      { id: 1, name: 'Product A', price: 29.99, rating: 4.5 },
-      { id: 2, name: 'Product B', price: 49.99, rating: 4.2 },
-      { id: 3, name: 'Product C', price: 19.99, rating: 4.8 }
+    sessions: mockSessions,
+    articles: mockArticles,
+    assessments: mockAssessments,
+    counselors: [
+      { id: 1, name: 'Dr. Sarah Johnson', specialization: 'Youth Psychology', rating: 4.8, available: true },
+      { id: 2, name: 'Dr. Michael Brown', specialization: 'Academic Stress', rating: 4.7, available: true },
+      { id: 3, name: 'Dr. Emily Davis', specialization: 'Interpersonal Relationships', rating: 4.9, available: false }
     ]
   },
   
   getters: {
     isAuthenticated: state => state.isAuthenticated,
     currentUser: state => state.user,
-    isAdmin: state => state.user && state.user.role === 'admin',
-    isUser: state => state.user && state.user.role === 'user',
-    averageRating: state => {
-      if (state.reviews.length === 0) return 0
-      const total = state.reviews.reduce((sum, review) => sum + review.rating, 0)
-      return (total / state.reviews.length).toFixed(1)
+    isCounselor: state => state.user && state.user.role === 'counselor',
+    isStudent: state => state.user && state.user.role === 'student',
+    totalUsers: state => mockUsers.length,
+    totalSessions: state => state.sessions.length,
+    completedSessions: state => state.sessions.filter(s => s.status === 'completed').length,
+    averageSessionRating: state => {
+      const completedSessions = state.sessions.filter(s => s.status === 'completed' && s.rating > 0)
+      if (completedSessions.length === 0) return 0
+      const total = completedSessions.reduce((sum, session) => sum + session.rating, 0)
+      return (total / completedSessions.length).toFixed(1)
     },
-    totalReviews: state => state.reviews.length
+    userSessions: state => userId => state.sessions.filter(s => s.userId === userId),
+    counselorSessions: state => counselorName => state.sessions.filter(s => s.counselorName === counselorName)
   },
   
   mutations: {
@@ -67,18 +140,27 @@ export default createStore({
       state.user = user
       state.isAuthenticated = !!user
     },
-    ADD_REVIEW(state, review) {
-      state.reviews.push({
-        ...review,
-        id: state.reviews.length + 1,
+    ADD_SESSION(state, session) {
+      state.sessions.push({
+        ...session,
+        id: state.sessions.length + 1,
         date: new Date().toISOString().split('T')[0]
       })
     },
-    UPDATE_PRODUCT_RATING(state, { productId, newRating }) {
-      const product = state.products.find(p => p.id === productId)
-      if (product) {
-        product.rating = newRating
+    UPDATE_SESSION(state, { sessionId, updates }) {
+      const session = state.sessions.find(s => s.id === sessionId)
+      if (session) {
+        Object.assign(session, updates)
       }
+    },
+    ADD_ARTICLE(state, article) {
+      state.articles.push({
+        ...article,
+        id: state.articles.length + 1,
+        date: new Date().toISOString().split('T')[0],
+        views: 0,
+        rating: 0
+      })
     }
   },
   
@@ -92,13 +174,13 @@ export default createStore({
           )
           
           if (user) {
-            // Remove password from user object for security
+            // Remove password for security
             const { password, ...userWithoutPassword } = user
             commit('SET_USER', userWithoutPassword)
             localStorage.setItem('user', JSON.stringify(userWithoutPassword))
             resolve(userWithoutPassword)
           } else {
-            reject(new Error('Invalid credentials'))
+            reject(new Error('Invalid email or password'))
           }
         }, 500)
       })
@@ -111,17 +193,17 @@ export default createStore({
           const existingUser = mockUsers.find(u => u.email === userData.email)
           
           if (existingUser) {
-            reject(new Error('User already exists'))
+            reject(new Error('Email already registered'))
             return
           }
           
           const newUser = {
             id: mockUsers.length + 1,
             ...userData,
-            role: 'user' // Default role
+            role: 'student' // Default role is student
           }
           
-          // Remove password from user object for security
+          // Remove password for security
           const { password, ...userWithoutPassword } = newUser
           commit('SET_USER', userWithoutPassword)
           localStorage.setItem('user', JSON.stringify(userWithoutPassword))
@@ -142,10 +224,31 @@ export default createStore({
       }
     },
     
-    addReview({ commit }, review) {
+    bookSession({ commit }, sessionData) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          commit('ADD_REVIEW', review)
+          commit('ADD_SESSION', {
+            ...sessionData,
+            status: 'scheduled',
+            rating: 0,
+            feedback: ''
+          })
+          resolve()
+        }, 300)
+      })
+    },
+    
+    completeSession({ commit }, { sessionId, rating, feedback }) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          commit('UPDATE_SESSION', {
+            sessionId,
+            updates: {
+              status: 'completed',
+              rating,
+              feedback
+            }
+          })
           resolve()
         }, 300)
       })

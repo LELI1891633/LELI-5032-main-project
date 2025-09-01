@@ -1,10 +1,11 @@
 <template>
   <div class="login-container">
     <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-4">
+      <div class="col-md-7 col-lg-6">
         <div class="card shadow">
-          <div class="card-header text-center bg-primary text-white">
-            <h4 class="mb-0">Login</h4>
+          <div class="card-header text-center bg-gradient-primary text-white">
+            <h4 class="mb-0">Welcome Back</h4>
+            <p class="mb-0 small">Start your mental health journey</p>
           </div>
           <div class="card-body p-4">
             <form @submit.prevent="handleLogin" novalidate>
@@ -46,39 +47,70 @@
                 </div>
               </div>
 
+              <!-- Remember Me -->
+              <div class="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="rememberMe"
+                  v-model="form.rememberMe"
+                />
+                <label class="form-check-label" for="rememberMe">
+                  Remember me
+                </label>
+              </div>
+
               <!-- Submit Button -->
-              <div class="d-grid">
+              <div class="d-grid mb-3">
                 <button
                   type="submit"
                   class="btn btn-primary"
                   :disabled="isLoading || !isFormValid"
                 >
                   <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                  {{ isLoading ? 'Logging in...' : 'Login' }}
+                  {{ isLoading ? 'Signing In...' : 'Sign In' }}
                 </button>
               </div>
 
               <!-- Error Message -->
-              <div v-if="loginError" class="alert alert-danger mt-3">
+              <div v-if="loginError" class="alert alert-danger">
                 {{ loginError }}
               </div>
             </form>
 
-            <hr class="my-4" />
+            <hr class="my-3" />
 
-            <div class="text-center">
+            <div class="text-center mb-3">
               <p class="mb-0">Don't have an account?</p>
-              <router-link to="/register" class="btn btn-outline-primary">
-                Register Now
+              <router-link to="/register" class="btn btn-outline-primary btn-sm">
+                Create Account
               </router-link>
             </div>
 
-            <!-- Demo Credentials -->
-            <div class="mt-4 p-3 bg-light rounded">
-              <h6 class="text-muted">Demo Credentials:</h6>
-              <div class="small">
-                <strong>Admin:</strong> admin@example.com / admin123<br>
-                <strong>User:</strong> user@example.com / user123
+            <!-- Demo Credentials and Tips Row -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="demo-credentials">
+                  <h6 class="text-muted mb-2">Demo Credentials:</h6>
+                  <div class="small text-muted">
+                    <div class="mb-1">
+                      <strong>Counselor:</strong> counselor@example.com / counselor123
+                    </div>
+                    <div>
+                      <strong>Student:</strong> student@example.com / student123
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mental-health-tips">
+                  <h6 class="text-success mb-2">💡 Quick Tips</h6>
+                  <ul class="small text-muted mb-0">
+                    <li>Practice deep breathing daily</li>
+                    <li>Maintain regular sleep schedule</li>
+                    <li>Stay connected with others</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -104,7 +136,8 @@ export default {
 
     const form = reactive({
       email: '',
-      password: ''
+      password: '',
+      rememberMe: false
     })
 
     const errors = reactive({
@@ -170,13 +203,20 @@ export default {
         // Sanitize inputs before sending to store
         const sanitizedCredentials = {
           email: sanitizeInput(form.email.trim()),
-          password: form.password // Don't sanitize password as it might contain special chars
+          password: form.password // Don't sanitize password
         }
 
         await store.dispatch('login', sanitizedCredentials)
-        router.push('/dashboard')
+        
+        // Redirect based on user role
+        const user = store.getters.currentUser
+        if (user.role === 'counselor') {
+          router.push('/admin')
+        } else {
+          router.push('/dashboard')
+        }
       } catch (error) {
-        loginError.value = error.message || 'Login failed. Please try again.'
+        loginError.value = error.message || 'Login failed. Please check your credentials and try again.'
       } finally {
         isLoading.value = false
       }
@@ -199,26 +239,92 @@ export default {
 
 <style scoped>
 .login-container {
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .card {
   border: none;
-  border-radius: 10px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .card-header {
-  border-radius: 10px 10px 0 0 !important;
+  border-radius: 15px 15px 0 0 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .form-control:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn:disabled {
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-input:checked {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.demo-credentials {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.mental-health-tips {
+  background: rgba(40, 167, 69, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #28a745;
+}
+
+.mental-health-tips ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.mental-health-tips li {
+  margin-bottom: 0.25rem;
+}
+
+.mental-health-tips li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+  }
+  
+  .card {
+    margin: 0;
+  }
+  
+  .demo-credentials,
+  .mental-health-tips {
+    margin-bottom: 1rem;
+  }
 }
 </style>

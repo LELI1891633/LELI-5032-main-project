@@ -3,8 +3,9 @@
     <div class="row justify-content-center">
       <div class="col-md-6 col-lg-5">
         <div class="card shadow">
-          <div class="card-header text-center bg-success text-white">
-            <h4 class="mb-0">Create Account</h4>
+          <div class="card-header text-center bg-gradient-success text-white">
+            <h4 class="mb-0">Join Mental Health Community</h4>
+            <p class="mb-0 small">Start your mental health growth journey</p>
           </div>
           <div class="card-body p-4">
             <form @submit.prevent="handleRegister" novalidate>
@@ -46,6 +47,30 @@
                 </div>
               </div>
 
+              <!-- Age Field -->
+              <div class="mb-3">
+                <label for="age" class="form-label">Age</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  :class="{ 'is-invalid': errors.age, 'is-valid': !errors.age && form.age }"
+                  id="age"
+                  v-model="form.age"
+                  @blur="validateAge"
+                  @input="clearError('age')"
+                  placeholder="Enter your age"
+                  min="13"
+                  max="25"
+                  required
+                />
+                <div v-if="errors.age" class="invalid-feedback">
+                  {{ errors.age }}
+                </div>
+                <div class="form-text">
+                  This platform is designed for youth aged 13-25
+                </div>
+              </div>
+
               <!-- Password Field -->
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
@@ -57,14 +82,14 @@
                   v-model="form.password"
                   @blur="validatePassword"
                   @input="clearError('password')"
-                  placeholder="Enter your password"
+                  placeholder="Set your password"
                   required
                 />
                 <div v-if="errors.password" class="invalid-feedback">
                   {{ errors.password }}
                 </div>
                 <div class="form-text">
-                  Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.
+                  Password must be at least 8 characters with uppercase, lowercase, and numbers
                 </div>
               </div>
 
@@ -87,23 +112,57 @@
                 </div>
               </div>
 
-              <!-- Terms and Conditions -->
+              <!-- User Type Selection -->
+              <div class="mb-3">
+                <label class="form-label">User Type</label>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="student"
+                    v-model="form.userType"
+                    value="student"
+                    @change="clearError('userType')"
+                  />
+                  <label class="form-check-label" for="student">
+                    Student - Seeking mental health support
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="counselor"
+                    v-model="form.userType"
+                    value="counselor"
+                    @change="clearError('userType')"
+                  />
+                  <label class="form-check-label" for="counselor">
+                    Counselor - Providing professional services
+                  </label>
+                </div>
+                <div v-if="errors.userType" class="invalid-feedback d-block">
+                  {{ errors.userType }}
+                </div>
+              </div>
+
+              <!-- Privacy Policy -->
               <div class="mb-3">
                 <div class="form-check">
                   <input
                     class="form-check-input"
-                    :class="{ 'is-invalid': errors.terms }"
+                    :class="{ 'is-invalid': errors.privacy }"
                     type="checkbox"
-                    id="terms"
-                    v-model="form.terms"
-                    @change="clearError('terms')"
+                    id="privacy"
+                    v-model="form.privacy"
+                    @change="clearError('privacy')"
                     required
                   />
-                  <label class="form-check-label" for="terms">
-                    I agree to the <a href="#" @click.prevent="showTerms">Terms and Conditions</a>
+                  <label class="form-check-label" for="privacy">
+                    I have read and agree to the <a href="#" @click.prevent="showPrivacy">Privacy Policy</a> and <a href="#" @click.prevent="showTerms">Terms of Service</a>
                   </label>
-                  <div v-if="errors.terms" class="invalid-feedback">
-                    {{ errors.terms }}
+                  <div v-if="errors.privacy" class="invalid-feedback">
+                    {{ errors.privacy }}
                   </div>
                 </div>
               </div>
@@ -131,34 +190,73 @@
             <div class="text-center">
               <p class="mb-0">Already have an account?</p>
               <router-link to="/login" class="btn btn-outline-primary">
-                Login Now
+                Sign In Now
               </router-link>
+            </div>
+
+            <!-- Why Choose Us -->
+            <div class="mt-4 p-3 bg-success bg-opacity-10 rounded">
+              <h6 class="text-success">🌟 Why Choose Us?</h6>
+              <ul class="small text-muted mb-0">
+                <li>Professional team of mental health counselors</li>
+                <li>Safe and confidential privacy protection</li>
+                <li>Personalized mental health support</li>
+                <li>24/7 online service support</li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Terms Modal -->
+    <!-- Privacy Policy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Privacy Policy</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <h6>1. Information Collection</h6>
+            <p>We only collect necessary personal information for providing mental health services.</p>
+            
+            <h6>2. Information Protection</h6>
+            <p>All personal information is encrypted and your privacy is strictly protected.</p>
+            
+            <h6>3. Information Usage</h6>
+            <p>Your information is only used for providing mental health services and will not be used for other commercial purposes.</p>
+            
+            <h6>4. Information Sharing</h6>
+            <p>We will not share your personal information with third parties unless required by law.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
     <div class="modal fade" id="termsModal" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Terms and Conditions</h5>
+            <h5 class="modal-title">Terms of Service</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <h6>1. Account Registration</h6>
-            <p>By creating an account, you agree to provide accurate and complete information.</p>
+            <h6>1. Service Content</h6>
+            <p>We provide professional mental health assessment, counseling, and educational services.</p>
             
-            <h6>2. Security</h6>
-            <p>You are responsible for maintaining the confidentiality of your account credentials.</p>
+            <h6>2. User Responsibilities</h6>
+            <p>Users should provide accurate information and comply with platform usage guidelines.</p>
             
-            <h6>3. Acceptable Use</h6>
-            <p>You agree not to use the service for any unlawful purpose or to violate any applicable laws.</p>
+            <h6>3. Service Limitations</h6>
+            <p>This platform does not provide emergency mental health crisis intervention. Please call relevant hotlines for emergencies.</p>
             
-            <h6>4. Privacy</h6>
-            <p>Your personal information will be handled in accordance with our privacy policy.</p>
+            <h6>4. Disclaimer</h6>
+            <p>Platform services cannot replace professional medical diagnosis and treatment.</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -186,17 +284,21 @@ export default {
     const form = reactive({
       name: '',
       email: '',
+      age: '',
       password: '',
       confirmPassword: '',
-      terms: false
+      userType: '',
+      privacy: false
     })
 
     const errors = reactive({
       name: '',
       email: '',
+      age: '',
       password: '',
       confirmPassword: '',
-      terms: ''
+      userType: '',
+      privacy: ''
     })
 
     // Form validation functions
@@ -223,6 +325,17 @@ export default {
       }
     }
 
+    const validateAge = () => {
+      const age = parseInt(form.age)
+      if (!form.age) {
+        errors.age = 'Age is required'
+      } else if (age < 13 || age > 25) {
+        errors.age = 'Age must be between 13-25 years'
+      } else {
+        errors.age = ''
+      }
+    }
+
     const validatePassword = () => {
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/
       if (!form.password) {
@@ -230,12 +343,12 @@ export default {
       } else if (form.password.length < 8) {
         errors.password = 'Password must be at least 8 characters long'
       } else if (!passwordRegex.test(form.password)) {
-        errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+        errors.password = 'Password must contain uppercase, lowercase letters and numbers'
       } else {
         errors.password = ''
       }
       
-      // Re-validate confirm password if it exists
+      // Re-validate confirm password
       if (form.confirmPassword) {
         validateConfirmPassword()
       }
@@ -268,13 +381,18 @@ export default {
     }
 
     const isFormValid = computed(() => {
-      return form.name && form.email && form.password && form.confirmPassword && 
-             form.terms && !errors.name && !errors.email && !errors.password && 
-             !errors.confirmPassword && !errors.terms
+      return form.name && form.email && form.age && form.password && 
+             form.confirmPassword && form.userType && form.privacy && 
+             !errors.name && !errors.email && !errors.age && !errors.password && 
+             !errors.confirmPassword && !errors.userType && !errors.privacy
     })
 
+    const showPrivacy = () => {
+      const modal = new bootstrap.Modal(document.getElementById('privacyModal'))
+      modal.show()
+    }
+
     const showTerms = () => {
-      // Bootstrap modal functionality
       const modal = new bootstrap.Modal(document.getElementById('termsModal'))
       modal.show()
     }
@@ -283,13 +401,20 @@ export default {
       // Validate all fields
       validateName()
       validateEmail()
+      validateAge()
       validatePassword()
       validateConfirmPassword()
       
-      if (!form.terms) {
-        errors.terms = 'You must agree to the terms and conditions'
+      if (!form.userType) {
+        errors.userType = 'Please select user type'
       } else {
-        errors.terms = ''
+        errors.userType = ''
+      }
+
+      if (!form.privacy) {
+        errors.privacy = 'Please agree to the privacy policy and terms of service'
+      } else {
+        errors.privacy = ''
       }
 
       if (!isFormValid.value) {
@@ -304,7 +429,9 @@ export default {
         const sanitizedUserData = {
           name: sanitizeInput(form.name.trim()),
           email: sanitizeInput(form.email.trim()),
-          password: form.password // Don't sanitize password
+          age: parseInt(form.age),
+          password: form.password,
+          role: form.userType
         }
 
         await store.dispatch('register', sanitizedUserData)
@@ -317,11 +444,8 @@ export default {
     }
 
     onMounted(() => {
-      // Import Bootstrap JS for modal functionality
-      if (typeof window !== 'undefined' && window.bootstrap) {
-        // Bootstrap is already available
-      } else {
-        // Load Bootstrap JS dynamically if needed
+      // Load Bootstrap JS dynamically
+      if (typeof window !== 'undefined' && !window.bootstrap) {
         const script = document.createElement('script')
         script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'
         document.head.appendChild(script)
@@ -336,9 +460,11 @@ export default {
       isFormValid,
       validateName,
       validateEmail,
+      validateAge,
       validatePassword,
       validateConfirmPassword,
       clearError,
+      showPrivacy,
       showTerms,
       handleRegister
     }
@@ -351,28 +477,50 @@ export default {
   min-height: 80vh;
   display: flex;
   align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .card {
   border: none;
-  border-radius: 10px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .card-header {
-  border-radius: 10px 10px 0 0 !important;
+  border-radius: 15px 15px 0 0 !important;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 }
 
 .form-control:focus {
-  border-color: #198754;
-  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
 .btn:disabled {
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .form-check-input:checked {
-  background-color: #198754;
-  border-color: #198754;
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 }
 </style>
