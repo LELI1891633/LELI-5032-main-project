@@ -1,22 +1,75 @@
 <template>
-  <div class="container py-5">
-    <h1 class="text-center mb-4">Youth Mental Health & Wellbeing</h1>
-    <div class="row">
-      <div class="col-12 col-md-6 mb-3">
-        <div class="card p-3 shadow-sm h-100">
-          <h2 class="h5">About</h2>
-          <p>This is the starter version of our app (Version 1 - Init).</p>
+  <div id="app">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <router-link class="navbar-brand" to="/">Vue.js 3 App</router-link>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <router-link class="nav-link" to="/">Home</router-link>
+            </li>
+            <li class="nav-item" v-if="isAuthenticated">
+              <router-link class="nav-link" to="/dashboard">Dashboard</router-link>
+            </li>
+            <li class="nav-item" v-if="isAuthenticated && isAdmin">
+              <router-link class="nav-link" to="/admin">Admin</router-link>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item" v-if="!isAuthenticated">
+              <router-link class="nav-link" to="/login">Login</router-link>
+            </li>
+            <li class="nav-item" v-if="!isAuthenticated">
+              <router-link class="nav-link" to="/register">Register</router-link>
+            </li>
+            <li class="nav-item" v-if="isAuthenticated">
+              <a class="nav-link" href="#" @click="logout">Logout</a>
+            </li>
+          </ul>
         </div>
       </div>
-      <div class="col-12 col-md-6 mb-3">
-        <div class="card p-3 shadow-sm h-100">
-          <h2 class="h5">Responsive Test</h2>
-          <p>Resize the window to see how the layout adapts.</p>
-        </div>
-      </div>
-    </div>
+    </nav>
+
+    <main class="container mt-4">
+      <router-view />
+    </main>
   </div>
 </template>
 
-<script setup>
+<script>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+
+export default {
+  name: 'App',
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+
+    const isAuthenticated = computed(() => store.getters.isAuthenticated)
+    const isAdmin = computed(() => store.getters.isAdmin)
+
+    const logout = () => {
+      store.dispatch('logout')
+      router.push('/login')
+    }
+
+    return {
+      isAuthenticated,
+      isAdmin,
+      logout
+    }
+  }
+}
 </script>
+
+<style>
+#app {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+</style>
