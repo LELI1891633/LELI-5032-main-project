@@ -1,22 +1,39 @@
 import { createStore } from 'vuex'
 
-// Mock data
+// Security: SHA-256 helper for password hashing
+async function sha256(text) {
+  const enc = new TextEncoder().encode(text)
+  const buf = await crypto.subtle.digest('SHA-256', enc)
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// Mock users with hashed passwords (no plaintext stored)
 const mockUsers = [
   {
     id: 1,
     email: 'counselor@example.com',
-    password: 'counselor123',
+    passwordHash: '',
     name: 'Dr. Sarah Johnson',
     role: 'counselor'
   },
   {
     id: 2,
     email: 'student@example.com',
-    password: 'student123',
+    passwordHash: '',
     name: 'Alex Chen',
     role: 'student'
   }
 ]
+
+// Initialize demo password hashes asynchronously (uses the same demo passwords as UI hints)
+;(async () => {
+  try {
+    if (!mockUsers[0].passwordHash) mockUsers[0].passwordHash = await sha256('counselor123')
+    if (!mockUsers[1].passwordHash) mockUsers[1].passwordHash = await sha256('student123')
+  } catch (e) {
+    // best-effort; if crypto API unavailable, keep empty and login will fail safely
+  }
+})()
 
 const mockSessions = [
   {
@@ -165,51 +182,36 @@ export default createStore({
   },
   
   actions: {
-    login({ commit }, credentials) {
-      return new Promise((resolve, reject) => {
-        // Simulate API call
-        setTimeout(() => {
-          const user = mockUsers.find(u => 
-            u.email === credentials.email && u.password === credentials.password
-          )
-          
-          if (user) {
-            // Remove password for security
-            const { password, ...userWithoutPassword } = user
-            commit('SET_USER', userWithoutPassword)
-            localStorage.setItem('user', JSON.stringify(userWithoutPassword))
-            resolve(userWithoutPassword)
-          } else {
-            reject(new Error('Invalid email or password'))
-          }
-        }, 500)
-      })
+    async login({ commit }, credentials) {
+      const { email, password } = credentials
+      const hash = await sha256(password)
+      const user = mockUsers.find(u => u.email === email && u.passwordHash === hash)
+      if (!user) throw new Error('Invalid email or password')
+      const { passwordHash, ...userWithoutPassword } = user
+      commit('SET_USER', userWithoutPassword)
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword))
+      return userWithoutPassword
     },
-    
-    register({ commit }, userData) {
-      return new Promise((resolve, reject) => {
-        // Simulate API call
-        setTimeout(() => {
-          const existingUser = mockUsers.find(u => u.email === userData.email)
-          
-          if (existingUser) {
-            reject(new Error('Email already registered'))
-            return
-          }
-          
-          const newUser = {
-            id: mockUsers.length + 1,
-            ...userData,
-            role: 'student' // Default role is student
-          }
-          
-          // Remove password for security
-          const { password, ...userWithoutPassword } = newUser
-          commit('SET_USER', userWithoutPassword)
-          localStorage.setItem('user', JSON.stringify(userWithoutPassword))
-          resolve(userWithoutPassword)
-        }, 500)
-      })
+
+    async register({ commit }, userData) {
+      const existingUser = mockUsers.find(u => u.email.toLowerCase() === String(userData.email).toLowerCase())
+      if (existingUser) {
+        throw new Error('Email already registered')
+      }
+      const passwordHash = await sha256(userData.password)
+      const role = userData.role || 'student'
+      const newUser = {
+        id: mockUsers.length + 1,
+        email: userData.email,
+        name: userData.name,
+        role,
+        passwordHash
+      }
+      mockUsers.push(newUser)
+      const { passwordHash: _omit, ...userWithoutPassword } = newUser
+      commit('SET_USER', userWithoutPassword)
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword))
+      return userWithoutPassword
     },
     
     logout({ commit }) {
