@@ -46,28 +46,25 @@
 </template>
 
 <script>
-import { computed } from 'vue'
-import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useAuth } from './composables/useAuth'
 
 export default {
   name: 'App',
   setup() {
-    const store = useStore()
-    const router = useRouter()
-
-    const isAuthenticated = computed(() => store.getters.isAuthenticated)
-    const isCounselor = computed(() => store.getters.isCounselor)
-
-    const logout = () => {
-      store.dispatch('logout')
-      router.push('/login')
-    }
+    const { 
+      isAuthenticated, 
+      isCounselor, 
+      logout,
+      showForRole,
+      showForRoles 
+    } = useAuth()
 
     return {
       isAuthenticated,
       isCounselor,
-      logout
+      logout,
+      showForRole,
+      showForRoles
     }
   }
 }
