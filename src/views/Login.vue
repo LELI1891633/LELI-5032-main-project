@@ -124,6 +124,7 @@
 import { ref, computed, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { validateEmail, preventXSS } from '@/utils/security'
 
 export default {
   name: 'Login',
@@ -146,11 +147,10 @@ export default {
     })
 
     // Form validation functions
-    const validateEmail = () => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const validateEmailField = () => {
       if (!form.email) {
         errors.email = 'Email is required'
-      } else if (!emailRegex.test(form.email)) {
+      } else if (!validateEmail(form.email)) {
         errors.email = 'Please enter a valid email address'
       } else {
         errors.email = ''
@@ -189,7 +189,7 @@ export default {
 
     const handleLogin = async () => {
       // Validate all fields
-      validateEmail()
+      validateEmailField()
       validatePassword()
 
       if (!isFormValid.value) {
@@ -202,7 +202,7 @@ export default {
       try {
         // Sanitize inputs before sending to store
         const sanitizedCredentials = {
-          email: sanitizeInput(form.email.trim()),
+          email: preventXSS(form.email.trim().toLowerCase()),
           password: form.password // Don't sanitize password
         }
 
@@ -228,7 +228,7 @@ export default {
       isLoading,
       loginError,
       isFormValid,
-      validateEmail,
+      validateEmail: validateEmailField,
       validatePassword,
       clearError,
       handleLogin

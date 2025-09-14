@@ -124,7 +124,7 @@ export default createStore({
   state: {
     user: null,
     isAuthenticated: false,
-    sessions: mockSessions,
+    sessions: mockSessions, // also used to store ratings
     articles: mockArticles,
     assessments: mockAssessments,
     counselors: [
@@ -149,7 +149,24 @@ export default createStore({
       return (total / completedSessions.length).toFixed(1)
     },
     userSessions: state => userId => state.sessions.filter(s => s.userId === userId),
-    counselorSessions: state => counselorName => state.sessions.filter(s => s.counselorName === counselorName)
+    counselorSessions: state => counselorName => state.sessions.filter(s => s.counselorName === counselorName),
+    averageRatingByItem: (state) => (itemId) => {
+      const rs = state.sessions.filter(s => s.itemId === itemId && s.rating > 0)
+      if (!rs.length) return 0
+      const sum = rs.reduce((a, b) => a + (b.rating || 0), 0)
+      return sum / rs.length
+    },
+    ratingCountsByItem: (state) => (itemId) => {
+      const counts = { 5:0,4:0,3:0,2:0,1:0 }
+      state.sessions.forEach(s => {
+        if (s.itemId === itemId && s.rating > 0) counts[s.rating]++
+      })
+      return counts
+    },
+    totalRatingsByItem: (state, getters) => (itemId) => {
+      const c = getters.ratingCountsByItem(itemId)
+      return Object.values(c).reduce((a,b)=>a+b,0)
+    }
   },
   
   mutations: {
@@ -254,6 +271,17 @@ export default createStore({
           resolve()
         }, 300)
       })
+    },
+
+    submitRating({ commit, state }, { itemId, userId, rating, feedback }) {
+      // enforce 1..5 range
+      const r = Math.min(5, Math.max(1, Number(rating) || 0))
+      const existing = state.sessions.find(s => s.itemId === itemId && s.userId === userId)
+      if (existing) {
+        commit('UPDATE_SESSION', { sessionId: existing.id, updates: { rating: r, feedback } })
+      } else {
+        commit('ADD_SESSION', { itemId, userId, rating: r, feedback, date: new Date().toISOString() })
+      }
     }
   }
 })

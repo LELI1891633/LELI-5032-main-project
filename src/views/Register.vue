@@ -271,6 +271,7 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { validateEmail, validatePassword, preventXSS } from '@/utils/security'
 
 export default {
   name: 'Register',
@@ -314,11 +315,10 @@ export default {
       }
     }
 
-    const validateEmail = () => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const validateEmailField = () => {
       if (!form.email) {
         errors.email = 'Email is required'
-      } else if (!emailRegex.test(form.email)) {
+      } else if (!validateEmail(form.email)) {
         errors.email = 'Please enter a valid email address'
       } else {
         errors.email = ''
@@ -336,14 +336,11 @@ export default {
       }
     }
 
-    const validatePassword = () => {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/
+    const validatePasswordField = () => {
       if (!form.password) {
         errors.password = 'Password is required'
-      } else if (form.password.length < 8) {
-        errors.password = 'Password must be at least 8 characters long'
-      } else if (!passwordRegex.test(form.password)) {
-        errors.password = 'Password must contain uppercase, lowercase letters and numbers'
+      } else if (!validatePassword(form.password)) {
+        errors.password = 'Password must be at least 8 characters with uppercase, lowercase and numbers'
       } else {
         errors.password = ''
       }
@@ -400,9 +397,9 @@ export default {
     const handleRegister = async () => {
       // Validate all fields
       validateName()
-      validateEmail()
+      validateEmailField()
       validateAge()
-      validatePassword()
+      validatePasswordField()
       validateConfirmPassword()
       
       if (!form.userType) {
@@ -427,8 +424,8 @@ export default {
       try {
         // Sanitize inputs before sending to store
         const sanitizedUserData = {
-          name: sanitizeInput(form.name.trim()),
-          email: sanitizeInput(form.email.trim()),
+          name: preventXSS(form.name.trim()),
+          email: preventXSS(form.email.trim().toLowerCase()),
           age: parseInt(form.age),
           password: form.password,
           role: form.userType
@@ -459,9 +456,9 @@ export default {
       registerError,
       isFormValid,
       validateName,
-      validateEmail,
+      validateEmail: validateEmailField,
       validateAge,
-      validatePassword,
+      validatePassword: validatePasswordField,
       validateConfirmPassword,
       clearError,
       showPrivacy,
