@@ -1,17 +1,22 @@
 <template>
   <div class="register-container">
     <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
+      <div class="col-12 col-md-10 col-lg-8 col-xl-6">
         <div class="card shadow">
           <div class="card-header text-center bg-gradient-success text-white">
             <h4 class="mb-0">Join Mental Health Community</h4>
             <p class="mb-0 small">Start your mental health growth journey</p>
           </div>
           <div class="card-body p-4">
+            <div class="mb-3">
+              <small class="text-muted">
+                <span class="text-danger">*</span> indicates required fields
+              </small>
+            </div>
             <form @submit.prevent="handleRegister" novalidate>
               <!-- Name Field -->
-              <div class="mb-3">
-                <label for="name" class="form-label">Full Name</label>
+              <div class="mb-4">
+                <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
                 <input
                   type="text"
                   class="form-control"
@@ -29,8 +34,8 @@
               </div>
 
               <!-- Email Field -->
-              <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
+              <div class="mb-4">
+                <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
                 <input
                   type="email"
                   class="form-control"
@@ -48,8 +53,8 @@
               </div>
 
               <!-- Age Field -->
-              <div class="mb-3">
-                <label for="age" class="form-label">Age</label>
+              <div class="mb-4">
+                <label for="age" class="form-label">Age <span class="text-danger">*</span></label>
                 <input
                   type="number"
                   class="form-control"
@@ -72,8 +77,8 @@
               </div>
 
               <!-- Password Field -->
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+              <div class="mb-4">
+                <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                 <input
                   type="password"
                   class="form-control"
@@ -94,8 +99,8 @@
               </div>
 
               <!-- Confirm Password Field -->
-              <div class="mb-3">
-                <label for="confirmPassword" class="form-label">Confirm Password</label>
+              <div class="mb-4">
+                <label for="confirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
                 <input
                   type="password"
                   class="form-control"
@@ -113,8 +118,8 @@
               </div>
 
               <!-- User Type Selection -->
-              <div class="mb-3">
-                <label class="form-label">User Type</label>
+              <div class="mb-4">
+                <label class="form-label">User Type <span class="text-danger">*</span></label>
                 <div class="form-check">
                   <input
                     class="form-check-input"
@@ -147,7 +152,7 @@
               </div>
 
               <!-- Privacy Policy -->
-              <div class="mb-3">
+              <div class="mb-4">
                 <div class="form-check">
                   <input
                     class="form-check-input"
@@ -159,7 +164,7 @@
                     required
                   />
                   <label class="form-check-label" for="privacy">
-                    I have read and agree to the <a href="#" @click.prevent="showPrivacy">Privacy Policy</a> and <a href="#" @click.prevent="showTerms">Terms of Service</a>
+                    I have read and agree to the <a href="#" @click.prevent="showPrivacy">Privacy Policy</a> and <a href="#" @click.prevent="showTerms">Terms of Service</a> <span class="text-danger">*</span>
                   </label>
                   <div v-if="errors.privacy" class="invalid-feedback">
                     {{ errors.privacy }}

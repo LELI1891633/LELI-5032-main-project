@@ -19,10 +19,10 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="container-fluid">
       <!-- Statistics Cards -->
       <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3 mb-3">
           <div class="stat-card">
             <div class="stat-icon">📊</div>
             <div class="stat-content">
@@ -31,7 +31,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3 mb-3">
           <div class="stat-card">
             <div class="stat-icon">⭐</div>
             <div class="stat-content">
@@ -40,7 +40,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3 mb-3">
           <div class="stat-card">
             <div class="stat-icon">📚</div>
             <div class="stat-content">
@@ -49,7 +49,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3 mb-3">
           <div class="stat-card">
             <div class="stat-icon">🎯</div>
             <div class="stat-content">
@@ -62,7 +62,7 @@
 
       <div class="row">
         <!-- Recent Sessions -->
-        <div class="col-lg-8 mb-4">
+        <div class="col-12 col-lg-8 mb-4">
           <div class="card shadow-sm">
             <div class="card-header bg-gradient-primary text-white">
               <h5 class="mb-0">
@@ -115,7 +115,7 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="col-lg-4 mb-4">
+        <div class="col-12 col-lg-4 mb-4">
           <div class="card shadow-sm">
             <div class="card-header bg-gradient-success text-white">
               <h5 class="mb-0">Quick Actions</h5>

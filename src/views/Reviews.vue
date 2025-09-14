@@ -1,15 +1,20 @@
 <template>
-  <div class="container py-4">
-    <h2 class="mb-3">Community Reviews</h2>
+  <div class="container-fluid py-4">
+    <h2 class="mb-4">Community Reviews</h2>
     <div class="row g-4">
-      <div class="col-md-7">
+      <div class="col-12 col-lg-7">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Leave your rating</h5>
             <div v-if="!user" class="alert alert-warning">Please login to rate.</div>
             <form v-else @submit.prevent="submit" novalidate>
               <div class="mb-3">
-                <label class="form-label">Rating (1–5)</label>
+                <small class="text-muted">
+                  <span class="text-danger">*</span> indicates required fields
+                </small>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Rating (1–5) <span class="text-danger">*</span></label>
                 <input class="form-control" type="number" min="1" max="5" v-model.number="rating" required />
               </div>
               <div class="mb-3">
@@ -28,7 +33,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-5">
+      <div class="col-12 col-lg-5">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Aggregated score</h5>

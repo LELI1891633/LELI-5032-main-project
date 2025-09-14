@@ -1,17 +1,22 @@
 <template>
   <div class="login-container">
     <div class="row justify-content-center">
-      <div class="col-md-7 col-lg-6">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
         <div class="card shadow">
           <div class="card-header text-center bg-gradient-primary text-white">
             <h4 class="mb-0">Welcome Back</h4>
             <p class="mb-0 small">Start your mental health journey</p>
           </div>
           <div class="card-body p-4">
+            <div class="mb-3">
+              <small class="text-muted">
+                <span class="text-danger">*</span> indicates required fields
+              </small>
+            </div>
             <form @submit.prevent="handleLogin" novalidate>
               <!-- Email Field -->
-              <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
+              <div class="mb-4">
+                <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
                 <input
                   type="email"
                   class="form-control"
@@ -29,8 +34,8 @@
               </div>
 
               <!-- Password Field -->
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+              <div class="mb-4">
+                <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                 <input
                   type="password"
                   class="form-control"
